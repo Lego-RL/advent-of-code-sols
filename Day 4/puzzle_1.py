@@ -11,7 +11,7 @@ class Board():
     #board is 2d list of each row of board
     def __init__(self, board: list):
         self.board = board
-        self.hits = [[0, 0, 0, 0, 0], [0, 0, 0, 0 ,0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.hits = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
 
 
     def notify_roll(self, roll: int) -> None:
@@ -115,7 +115,7 @@ for roll in rolls:
 
 
     if count >= 5:
-        for count, board in enumerate(boards):
+        for board in boards:
             if board.check_for_win():
                 print(board.get_sum_of_misses() * int(roll))
                 exit(0)
