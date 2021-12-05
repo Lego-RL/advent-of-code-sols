@@ -1,6 +1,3 @@
-from xmlrpc.client import FastMarshaller
-
-
 with open('input.txt', 'r') as f:
     data = f.readlines()
 
