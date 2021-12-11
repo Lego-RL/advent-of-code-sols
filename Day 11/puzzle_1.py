@@ -15,18 +15,9 @@ for string in data:
 
     octopuses.append(entry)
 
-#up = row-1, col
 
 def get_coords_adjacent_octopi(row: int, col: int) -> int:
 
-    #up = row-1, col
-    #top right = row-1, col + 1
-    #right = row, col + 1
-    #bottom right = row +1, col+1
-    #bottom left = row+1, col-1
-    #left = row, col-1
-    #top left = row-1, col-1
-    # offsets = ((row-1, col), (row-1, col+1), (row, col+1), (row+1, col+1), (row+1, col), (row+1, col-1), (row, col-1), (row-1, col-1))
     offsets = ((-1, 0), (-1, +1), (0, +1), (+1, +1), (+1, 0), (+1, -1), (0, -1), (-1, -1))
 
     adjacent_octopi = []
@@ -44,8 +35,8 @@ def get_coords_adjacent_octopi(row: int, col: int) -> int:
     return adjacent_octopi
 
 
-def check_should_flash(row, col):
 
+def check_should_flash(row, col):
     try:
         index = flashed.index((row, col))
 
@@ -54,6 +45,7 @@ def check_should_flash(row, col):
 
     if octopuses[row][col] > 9 and index < 0:
         flash(row, col)
+
 
 
 def flash(row, col):
@@ -77,15 +69,12 @@ def step():
 
     
     #make octopi flash if val > 9
-
-    # while max([item for sublist in octopuses for item in sublist]) >= 9:
     for row_num, row in enumerate(octopuses):
         for col_num, val in enumerate(row):
 
             if check_should_flash(row_num, col_num):
 
                 flash(row_num, col_num)
-                # flashed.append((row_num, col_num))
 
                 adjacent_octopi = get_coords_adjacent_octopi(row_num, col_num)
 
@@ -112,7 +101,3 @@ for i in range(100):
         print(x)
 
 print(count)
-
-
-
-# print(step())
