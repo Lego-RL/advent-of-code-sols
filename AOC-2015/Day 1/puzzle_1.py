@@ -1,6 +1,7 @@
 with open("input.txt", "r") as f:
-    data = f.read()
+    data: str = f.read()
 
-up, down = data.count("("), data.count(")")
+up: int = data.count("(")
+down: int = data.count(")")
 
 print(up - down)
