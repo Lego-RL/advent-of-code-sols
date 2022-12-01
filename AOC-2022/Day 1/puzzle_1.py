@@ -20,7 +20,6 @@ else:
     if current_elf:
         elf_calories.append(current_elf)
 
-elf_calories = [sum(x) for x in elf_calories]
 
 for i, elf in enumerate(elf_calories):
     print(i)
