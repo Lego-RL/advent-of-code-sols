@@ -1,4 +1,3 @@
-# from queue import Queue
 
 # with open("AOC-2023/Day 10/testinput.txt", "r") as f:
 with open("AOC-2023/Day 10/input.txt", "r") as f:
@@ -170,23 +169,98 @@ def puzzle1():
 
 
 
+#  add new char * between 7F and JL
+#  flood .'s and *'s 
+# number of .'s left over is answer
 
 def puzzle2():
-    tiles: list[list[str]] = []
+    tiles: list[str] = []
 
-    mostDotsAdded: int = 0
-    totalDotsAdded: int = 0
+    replacements: dict[list[list[str]]] = {
+        "7": ["...", "-7.", ".|."],
+        "F": ["...", ".F-", ".|."],
+        "J": [".|.", "-J.", "..."],
+        "L": [".|.", ".L-", "..."],
+        "|": [".|.", ".|.", ".|."],
+        "-": ["...", "---", "..."],
+        "S": [".|.", "-S-", ".|."],
+        ".": ["...", ".^.", "..."],
+    }
+
     for line in data:
         tiles.append(line)
 
-    for i, row in enumerate(tiles[::]):
-        for j, char in enumerate(row):
-            if char != ".":
-                invalidNeighbors: list[tuple[int]] = findInvalidNeighbors(tiles)
+    
+    # expand each char into 3x3
+    # flood outside starting from top left, changing adjacent .s to *s
+    # any leftover .s are inside
+        
+    expandedGrid: list[str] = []
+    # construct expanded grid
+    for row in tiles:
+        firstRow: str = ""
+        secondRow: str = ""
+        thirdRow: str = ""
+
+        for char in row:
+            replaceWith: list[str] = replacements[char]
+            firstRow += replaceWith[0]
+            secondRow += replaceWith[1]
+            thirdRow += replaceWith[2]
+
+        expandedGrid.append(firstRow)
+        expandedGrid.append(secondRow)
+        expandedGrid.append(thirdRow)
+
+    # [print(x) for x in expandedGrid]
+    
+    # replace top left element with & to initiate flood fill operation
+    expandedGrid[0] = "&" + expandedGrid[0][1:]
+
+    # for every . or ^ char, if it's next to a & sign flip it to an &
+    # initialized to 1 so while loop begins
+    numFlipped: int = 1
+
+    # if numflipped is 0 on any iteration, no more work to be done
+    while numFlipped != 0:
+        numFlipped = 0
+        for i, row in enumerate(expandedGrid[::]):
+            for j, char in enumerate(row):
+                if char in [".", "^"]:
+                    # if bordering &, change it
+
+                    for dir in (NORTH, SOUTH, EAST, WEST):
+                        coordToCheck: tuple[int, int] = (i+dir[0],j+dir[1])
+
+                        if (coordToCheck[0] < 0 or coordToCheck[1] < 0) or (coordToCheck[0] >= len(expandedGrid) or coordToCheck[1] >= len(expandedGrid[0])):
+                            continue
+
+                        if expandedGrid[coordToCheck[0]][coordToCheck[1]] == "&":
+                            numFlipped += 1
+                            # expandedGrid[i][j] = "&"
+                            if j+1 > len(expandedGrid):
+                                expandedGrid[i] = expandedGrid[i][:j] + "&"
+                            else:
+                                expandedGrid[i] = expandedGrid[i][:j] + "&" + expandedGrid[i][j+1:]
+                            break
+
+
+
+    # print(expandedGrid)
+
+    carrotCount: int = 0
+
+    for row in expandedGrid:
+        for char in row:
+            if char == "^":
+                carrotCount += 1
+
+    print(carrotCount)
+
 
         
 
 
 if __name__ == "__main__":
-    puzzle1()
-    # puzzle2()
+    # puzzle1()
+    puzzle2()
