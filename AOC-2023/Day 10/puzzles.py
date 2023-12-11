@@ -15,7 +15,7 @@ class Node():
         self.distance = distance
 
     def __hash__(self):
-        return self.coord
+        return self.coord[0] * 1000000 + self.coord[1]
 
     def __eq__(self, other):
         if isinstance(other, tuple):
@@ -104,68 +104,50 @@ def addNeighbor(adjacents: dict[tuple[int], list[tuple[int]]], coord: tuple[int]
 # tiles = map
 # visited = list of visited nodes
 # adjacents = map of coords to other valid coords adjacent to them
-global queue
-queue = []
-def bfs(tiles: list[tuple[str]], visited: list[tuple[int]], adjacents: dict[tuple[int], list[tuple[int]]], node: Node):
-    global furthestNode
-    global queue
+visited = set()
+def bfs(tiles: list[str], node: tuple[int]):
+    global visited
+    visited = set()
+    queue = set()
     
-    visited.append(node)
-    queue.append(node)
+    visited.add(node)
+    queue.add(node)
+
+    distance: int = -1
 
     while queue:
-        visitingNode: Node = queue.pop(0)
+        distance += 1
+        # print(f'{distance=}, {len(queue)=}')
+        newQueue: set = set()
 
-        adjacentCoords: list[tuple[int]] = adjacents.get(visitingNode.coord, [])
-        for neighbor in adjacentCoords:
-            neighborNode: Node = Node(neighbor, tiles[neighbor[0]][neighbor[1]], visitingNode.distance+1)
-            # check if neighbor has other neighbors that need to be added to adjacents list
-
-            validNeighbors: list[tuple[int]] = findValidNeighbors(tiles, neighbor)
-
-            # don't count current node
+        for visitingNode in queue:
+            visited.add(visitingNode)
+            validNeighbors: list[tuple[int]] = findValidNeighbors(tiles, visitingNode)
             validNeighbors = [x for x in validNeighbors if x not in visited]
+            for neighbor in validNeighbors:
+                newQueue.add(neighbor)
 
-            if neighbor in validNeighbors:
-                validNeighbors.remove(neighbor)
+        queue = newQueue
 
-            for validNeighbor in validNeighbors:
-                adjacents = addNeighbor(adjacents, neighbor, validNeighbor)
+    return distance
 
-            if neighborNode not in visited:
-                visited.append(neighborNode)
-                queue.append(neighborNode)
-
-                if furthestNode is None:
-                    furthestNode = neighborNode
-
-                elif neighborNode.distance > furthestNode.distance:
-                    furthestNode = neighborNode
-
-
-
+ 
 def puzzle1():
-    global furthestNode
+    # global visited
     start_index: tuple[int] = ()
 
-    tiles: list[tuple[str]] = []
+    tiles: list = data[::]
 
     for i, line in enumerate(data):
         if (start:= line.find("S")) > -1:
             start_index = (i, start)
-
-        tiles.append(tuple(list(line)))
+            break
 
     startNode: Node = Node(start_index, tiles[start_index[0]][start_index[1]], 0)
+    visited = []
+    maxDistance: int = bfs(data, startNode.coord)
 
-    validNeighbors: list[tuple[int]] = findValidNeighbors(tiles, startNode.coord)
-    adjacents: dict[tuple[int], list[tuple[int]]] = {}
-    for neighbor in validNeighbors:
-        adjacentNodes = addNeighbor(adjacents, startNode.coord, neighbor)
-    visited: list = []
-    bfs(tiles, visited, adjacentNodes, startNode)
-
-    print(f"{furthestNode=}")
+    print(f"{maxDistance=}")
 
 
 
@@ -174,8 +156,9 @@ def puzzle1():
 # number of .'s left over is answer
 
 def puzzle2():
+    global visited
     tiles: list[str] = []
-
+    
     replacements: dict[list[list[str]]] = {
         "7": ["...", "-7.", ".|."],
         "F": ["...", ".F-", ".|."],
@@ -187,8 +170,30 @@ def puzzle2():
         ".": ["...", ".^.", "..."],
     }
 
-    for line in data:
-        tiles.append(line)
+    # for line in data:
+    #     tiles.append(line)
+
+    
+
+    for i, line in enumerate(data):
+        lineInProg: str = ""
+        
+
+        for j, char in enumerate(line):
+
+            if (i, j) not in visited:
+                lineInProg += "."
+            
+            else:
+                lineInProg += char
+
+        tiles.append(lineInProg)
+
+    # [print(x) for x in tiles]
+
+
+
+    
 
     
     # expand each char into 3x3
@@ -235,32 +240,53 @@ def puzzle2():
                         if (coordToCheck[0] < 0 or coordToCheck[1] < 0) or (coordToCheck[0] >= len(expandedGrid) or coordToCheck[1] >= len(expandedGrid[0])):
                             continue
 
-                        if expandedGrid[coordToCheck[0]][coordToCheck[1]] == "&":
-                            numFlipped += 1
-                            # expandedGrid[i][j] = "&"
-                            if j+1 > len(expandedGrid):
-                                expandedGrid[i] = expandedGrid[i][:j] + "&"
-                            else:
-                                expandedGrid[i] = expandedGrid[i][:j] + "&" + expandedGrid[i][j+1:]
-                            break
+                        # print(f"{coordToCheck[0]=}, {len(expandedGrid)=}, {coordToCheck[1]}, {len(expandedGrid[coordToCheck[0]])}, ", flush=True)
+                        try:
+                            if expandedGrid[coordToCheck[0]][coordToCheck[1]] == "&":
+                                numFlipped += 1
+                                # expandedGrid[i][j] = "&"
+                                oldRow: int = expandedGrid[i]
+                                if j+1 >= len(expandedGrid[i]):
+                                    expandedGrid[i] = expandedGrid[i][:j] + "&"
+                                    # print('246')
+                                else:
+                                    expandedGrid[i] = expandedGrid[i][:j] + "&" + expandedGrid[i][j+1:]
+                                    # print('249')
 
+                                assert len(expandedGrid[i]) == len(oldRow)
+                                break
+
+                        except AssertionError:
+                            pass
+                            # print(f"{oldRow=}, {expandedGrid[i]}")
+
+                        except Exception as x:
+                            # print(f"{coordToCheck[0]=}, {len(expandedGrid)=}, {coordToCheck[1]}, {len(expandedGrid[coordToCheck[0]])}, ", flush=True)
+                            # [print(x) for x in expandedGrid]
+                            raise x
+    
 
 
     # print(expandedGrid)
+    # [print(x) for x in expandedGrid]
+
 
     carrotCount: int = 0
 
-    for row in expandedGrid:
-        for char in row:
+    for i, row in enumerate(expandedGrid):
+        print(f"{carrotCount=}")
+        for j, char in enumerate(row):
             if char == "^":
+                print(f"{i=}, {j=}")
                 carrotCount += 1
 
     print(carrotCount)
+    # [print(x) for x in expandedGrid]
 
 
         
 
 
 if __name__ == "__main__":
-    # puzzle1()
+    puzzle1()
     puzzle2()
