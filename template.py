@@ -1,5 +1,5 @@
-# with open("AOC-2023/Day 5/testinput.txt", "r") as f:
-with open("AOC-2023/Day 5/input.txt", "r") as f:
+with open("AOC-2023/Day 5/testinput.txt", "r") as f:
+# with open("AOC-2023/Day 5/input.txt", "r") as f:
     data = f.readlines()
 
 
